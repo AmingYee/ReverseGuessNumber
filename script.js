@@ -10,7 +10,11 @@ const outputList = document.getElementById("output");
 startGameBtn.addEventListener("click", startGame);
 
 playAgainBtn.addEventListener("click", () => {
-    location.reload();
+    startGameBtn.disabled = false;
+    attempts = 0;
+    removeAllListItems()
+    playAgainBtn.style.visibility = "hidden"
+    ongoing = true;
 });
 
 lowBtn.addEventListener('click', function() {
@@ -25,10 +29,12 @@ correctBtn.addEventListener('click', function() {
     checkGuess('correct');
 });
 
+let prevAttempts;
 let attempts = 0;
 let minRange = 1;
 let maxRange = 100;
 let guessedNumber = 0;
+let ongoing = true;
 
 function start(){
     console.log("Javascript running!");
@@ -64,6 +70,12 @@ function getGuessedNumber(min, max) {
     return guessedNumber
 }
 
+function removeAllListItems(){
+    while (outputList.firstChild) {
+        outputList.removeChild(outputList.firstChild);
+    }
+}
+
 function displayOutput(message) {
     const listItem = document.createElement("li");
     listItem.textContent = message;
@@ -77,11 +89,17 @@ function checkGuess(result) {
     } else if (result === 'high') {
         maxRange = guessedNumber - 1;
     } else if (result === 'correct') {
-        document.getElementById('output').innerHTML = `i guessed ${guessedNumber} in ${attempts} attempts`;
+        if (prevAttempts>attempts){
+            outputList.innerHTML = `i guessed ${guessedNumber} in ${attempts} attempts which is better than the previous game where it took ${prevAttempts} guesses`;
+        } else {
+            outputList.innerHTML = `i guessed ${guessedNumber} in ${attempts} attempts`;
+        }
+        prevAttempts = attempts;
         playAgainBtn.style.visibility = "visible"
         lowBtn.disabled = true;
         highBtn.disabled = true;
         correctBtn.disabled = true;
+        ongoing = false;
     }
 
     if (maxRange-minRange < 1 ){
@@ -90,7 +108,7 @@ function checkGuess(result) {
         lowBtn.disabled = true;
         highBtn.disabled = true;
         correctBtn.disabled = true;
-    } else {
+    } else if(ongoing === true){
         guessedNumber = getGuessedNumber(minRange, maxRange);
         displayOutput(`Computer guessed: ${guessedNumber}`);
     }
